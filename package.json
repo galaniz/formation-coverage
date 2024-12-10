@@ -1,0 +1,40 @@
+{
+  "name": "@alanizcreative/formation-coverage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/coverage.js",
+  "type": "module",
+  "files": [
+    "./lib"
+  ],
+  "scripts": {
+    "build": "npx tsc",
+    "lint": "npx ts-standard 'src/**/*.ts'",
+    "test": "vitest --run --reporter verbose --coverage",
+    "release": "release-it"
+  },
+  "keywords": [],
+  "author": "Graciela Alaniz (https://alanizcreative.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "11.0.0",
+    "istanbul-lib-coverage": "^3.2.2",
+    "istanbul-lib-report": "^3.0.1",
+    "istanbul-reports": "^3.1.7",
+    "v8-to-istanbul": "^9.3.0"
+  },
+  "devDependencies": {
+    "@types/istanbul-lib-coverage": "2.0.6",
+    "@types/istanbul-lib-report": "^3.0.3",
+    "@types/istanbul-reports": "^3.0.4",
+    "@types/node": "^22.10.1",
+    "@vitest/coverage-v8": "2.1.5",
+    "memfs": "4.15.0",
+    "release-it": "^17.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "2.1.5"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

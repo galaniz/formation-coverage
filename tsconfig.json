@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "target": "es2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noFallthroughCasesInSwitch": true,
+    "declaration": true,
+    "outDir": "lib",
+    "lib": [
+      "es2022"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.test.ts",
+    "**/*.config.ts"
+  ],
+  "exclude": [
+    "lib",
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.config.ts"
+  ]
+}
