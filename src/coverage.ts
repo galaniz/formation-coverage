@@ -22,13 +22,6 @@ import reports from 'istanbul-reports'
 let coverageDir: string = 'coverage'
 
 /**
- * Temporary coverage file name
- *
- * @type {string}
- */
-let coverageTempFile: string = 'coverage-tmp.json'
-
-/**
  * Coverage file name
  *
  * @type {string}
@@ -36,14 +29,14 @@ let coverageTempFile: string = 'coverage-tmp.json'
 let coverageFile: string = 'coverage.json'
 
 /**
- * Separator for temporary file data
+ * Separator for file data
  *
  * @type {string}
  */
 const coverageBreak: string = '*|FRM_BREAK|*'
 
 /**
- * Start and end playwright coverage and save to temp file
+ * Start and end playwright coverage and save to coverage file
  *
  * @param {string} browserName
  * @param {Page} page
@@ -55,58 +48,46 @@ const doCoverage = async (
   page: Page,
   start: boolean = true
 ): Promise<void> => {
-  try {
-    if (browserName !== 'chromium') {
-      return
-    }
-
-    if (start) {
-      return await page.coverage.startJSCoverage()
-    }
-
-    const result = await page.coverage.stopJSCoverage()
-
-    await appendFile(resolve(coverageTempFile), JSON.stringify(result) + coverageBreak)
-  } catch (error) {
-    console.error('[FRM] Error appending to temporary coverage file: ', error)
+  if (browserName !== 'chromium') {
+    return
   }
+
+  if (start) {
+    return await page.coverage.startJSCoverage()
+  }
+
+  const result = await page.coverage.stopJSCoverage()
+
+  await appendFile(coverageFile, JSON.stringify(result) + coverageBreak)
 }
 
 /**
  * Convert playwright coverage data
  *
+ * @private
  * @param {string} testUrl
  * @return {Promise<CoverageMapData[]>}
  */
-const loadCoverage = async (
-  testUrl: string = 'http://localhost:3000'
-): Promise<CoverageData[]> => {
-  try {
-    const fileData = await readFile(resolve(coverageTempFile), 'utf8')
-    const entries = fileData.split(coverageBreak).filter(Boolean)
-    const coverage: CoverageData[] = entries.map(entry => JSON.parse(entry)).flat(Infinity)
+const loadCoverage = async (testUrl: string): Promise<CoverageData[]> => {
+  const fileData = await readFile(coverageFile, 'utf8')
+  const entries = fileData.split(coverageBreak).filter(Boolean)
+  const coverage: CoverageData[] = entries.map(entry => JSON.parse(entry)).flat(Infinity)
 
-    const result = coverage.map((entry) => {
-      const { url, source } = entry
+  return coverage.map((entry) => {
+    const { url, source } = entry
 
-      if (source == null) {
-        return entry
-      }
-
-      const sourceFile = url.replace(`${testUrl}/`, '').replace('.js', '.js.map')
-      const newSource = source.replace(/sourceMappingURL=([^]+)\.map/, `sourceMappingURL=${sourceFile}`)
-
-      entry.source = newSource
-      entry.url = url.replace(`${testUrl}/`, './')
-
+    if (source == null) {
       return entry
-    })
+    }
 
-    return result
-  } catch (error) {
-    console.error('[FRM] Error loading coverage data:', error)
-    return []
-  }
+    const sourceFile = url.replace(`${testUrl}/`, '').replace('.js', '.js.map')
+    const newSource = source.replace(/sourceMappingURL=([^]+)\.map/, `sourceMappingURL=${sourceFile}`)
+
+    entry.source = newSource
+    entry.url = url.replace(`${testUrl}/`, './')
+
+    return entry
+  })
 }
 
 /**
@@ -117,17 +98,26 @@ const loadCoverage = async (
  * @return {void}
  */
 const setupCoverage = async (dirName: string, fileName: string): Promise<void> => {
-  try {
-    coverageDir = dirName
-    coverageFile = `${dirName}/${fileName}.json`
-    coverageTempFile = `${dirName}/${fileName}-tmp.json`
+  coverageDir = resolve(dirName)
+  coverageFile = resolve(coverageDir, `${fileName}.json`)
 
-    await mkdir(resolve(coverageDir))
-    const data = await loadCoverage()
-    await writeFile(resolve(coverageFile), JSON.stringify(data))
+  /* Clear directory if it exists */
+
+  try {
+    await access(coverageDir)
+    await rm(coverageDir, { recursive: true, force: true })
   } catch (error) {
-    console.error('[FRM] Error creating coverage file: ', error)
+    const err = error as { code?: string }
+
+    if (err?.code !== 'ENOENT') {
+      throw error
+    }
   }
+
+  /* Create directory and file */
+
+  await mkdir(coverageDir, { recursive: true })
+  await writeFile(coverageFile, '')
 }
 
 /**
@@ -137,118 +127,91 @@ const setupCoverage = async (dirName: string, fileName: string): Promise<void> =
  * @return {Promise<void>}
  */
 const createCoverageReport = async (args: CoverageReportArgs): Promise<void> => {
-  try {
-    /* Args */
+  /* Args */
 
-    const {
-      reporters = [],
-      outDir = 'test',
-      srcDir = 'src',
-      include = [],
-      exclude = []
-    } = args
+  const {
+    url: testUrl = 'http://localhost:3000',
+    reporters = [],
+    outDir = 'test',
+    srcDir = 'src',
+    include = [],
+    exclude = []
+  } = args
 
-    /* Files to include in report */
+  /* Files to include in report */
 
-    const includeFiles = await glob(include, { ignore: exclude })
+  const includeFiles = await glob(include, { ignore: exclude })
 
-    /* Coverage data map */
+  /* Coverage data map */
 
-    const fileContents = await readFile(resolve(coverageFile), 'utf8')
-    const coverageData = JSON.parse(fileContents)
-    const coverageMap = libCoverage.createCoverageMap()
-    const covered: string[] = []
+  const coverageData = await loadCoverage(testUrl)
+  const coverageMap = libCoverage.createCoverageMap()
+  const covered: string[] = []
 
-    for (const entry of coverageData) {
-      const entryUrl = entry.url
+  for (const entry of coverageData) {
+    const entryUrl = entry.url
 
-      if (!includeFiles.includes(entryUrl.replace('./', ''))) {
-        continue
-      }
-
-      const converter = v8toIstanbul(entryUrl)
-      await converter.load()
-      converter.applyCoverage(entry.functions)
-
-      const convertedCoverage = converter.toIstanbul()
-      coverageMap.merge(convertedCoverage)
-
-      covered.push(entryUrl)
+    if (!includeFiles.includes(entryUrl.replace('./', ''))) {
+      continue
     }
 
-    /* Include outstanding files from src in map */
+    const converter = v8toIstanbul(entryUrl)
+    await converter.load()
+    converter.applyCoverage(entry.functions)
 
-    for await (const file of includeFiles) {
-      if (covered.includes(`./${file}`)) {
-        continue
-      }
+    const convertedCoverage = converter.toIstanbul()
+    coverageMap.merge(convertedCoverage)
 
-      const filePath = resolve(file)
-      const srcFilePath = filePath.replace(outDir, srcDir).replace('.js', '.ts')
-      const srcEntry: Record<string, any> = {}
+    covered.push(entryUrl)
+  }
 
-      srcEntry[srcFilePath] = {
-        path: srcFilePath,
-        statementMap: {},
-        s: {},
-        branchMap: {},
-        b: {},
-        fnMap: {},
-        f: {},
-        lineCoverage: {}
-      }
+  /* Include outstanding files from src in map */
 
-      coverageMap.merge(srcEntry)
+  for await (const file of includeFiles) {
+    if (covered.includes(`./${file}`)) {
+      continue
     }
 
-    /* Context */
+    const filePath = resolve(file)
+    const srcFilePath = filePath.replace(outDir, srcDir).replace('.js', '.ts')
+    const srcEntry: Record<string, any> = {}
 
-    const context = libReport.createContext({
-      dir: `./${coverageDir}/coverage-report`,
-      coverageMap
+    srcEntry[srcFilePath] = {
+      path: srcFilePath,
+      statementMap: {},
+      s: {},
+      branchMap: {},
+      b: {},
+      fnMap: {},
+      f: {},
+      lineCoverage: {}
+    }
+
+    coverageMap.merge(srcEntry)
+  }
+
+  /* Context */
+
+  const context = libReport.createContext({
+    dir: `${coverageDir}/coverage-report`,
+    coverageMap
+  })
+
+  /* Reporters */
+
+  reporters.forEach(reporter => {
+    const report = reports.create(reporter, {
+      projectRoot: coverageDir
     })
 
-    /* Reporters */
-
-    reporters.forEach(reporter => {
-      const report = reports.create(reporter, {
-        projectRoot: resolve(coverageDir)
-      })
-
-      report.execute(context)
-    })
-  } catch (error) {
-    console.error('[FRM] Error creating coverage report:', error)
-  }
+    report.execute(context)
+  })
 }
-
-/**
- * Delete coverage files and folders
- *
- * @return {Promise<void>}
- */
-const clearCoverage = async (): Promise<void> => {
-  try {
-    const dir = resolve(coverageDir)
-    await access(dir)
-    await rm(dir, { recursive: true, force: true })
-  } catch (error) {
-    const err = error as { code?: string }
-
-    if (err?.code === 'ENOENT') {
-      return
-    }
-
-    console.error('[FRM] Error clearing coverage files or directories:', error)
-  }
-}
-
+ 
 /* Exports */
 
 export {
   doCoverage,
-  loadCoverage,
   setupCoverage,
-  clearCoverage,
   createCoverageReport
 }

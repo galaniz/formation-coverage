@@ -53,6 +53,7 @@ export type CoverageReportExclude = (entry: string) => boolean
 
 /**
  * @typedef {object} CoverageReportArgs
+ * @param {string} [url=http://localhost:3000]
  * @param {string} [outDir=test]
  * @param {string} [srcDir=src]
  * @param {string[]} [include]
@@ -60,6 +61,7 @@ export type CoverageReportExclude = (entry: string) => boolean
  * @param {string[]} [reporters] - text | html | lcov
  */
 export interface CoverageReportArgs {
+  url?: string
   outDir?: string
   srcDir?: string
   include?: string[]
