@@ -7,6 +7,26 @@
 import type { ReportOptions } from 'istanbul-reports'
 
 /**
+ * @typedef {object} CoverageSourceMap
+ * @prop {string} version
+ * @prop {string[]} sources
+ * @prop {string[]} names
+ * @prop {string} [sourceRoot]
+ * @prop {string[]} [sourcesContent]
+ * @prop {string} mappings
+ * @prop {string} file
+ */
+export interface CoverageSourceMap {
+  version: string
+  sources: string[]
+  names: string[]
+  sourceRoot?: string
+  sourcesContent?: string[]
+  mappings: string
+  file: string
+}
+
+/**
  * @typedef {object} CoverageRangeData
  * @prop {number} count
  * @prop {number} startOffset
@@ -32,10 +52,10 @@ export interface CoverageFnData {
 
 /**
  * @typedef {object} CoverageData
- * @param {string} url
- * @param {string} scriptId
- * @param {string} [source]
- * @param {CoverageFnData[]} functions
+ * @prop {string} url
+ * @prop {string} scriptId
+ * @prop {string} [source]
+ * @prop {CoverageFnData[]} functions
  */
 export interface CoverageData {
   url: string
@@ -52,15 +72,19 @@ export interface CoverageData {
 export type CoverageReportExclude = (entry: string) => boolean
 
 /**
- * @typedef {object} CoverageReportArgs
- * @param {string} [url=http://localhost:3000]
- * @param {string} [outDir=test]
- * @param {string} [srcDir=src]
- * @param {string[]} [include]
- * @param {string[]} [exclude]
- * @param {string[]} [reporters] - text | html | lcov
+ * @typedef {object} CoverageConfig
+ * @prop {string} [dir=formation-coverage]
+ * @prop {string} [file=formation-coverage.json]
+ * @prop {string} [url=http://localhost:3000]
+ * @prop {string} [outDir=test]
+ * @prop {string} [srcDir=src]
+ * @prop {string[]} [include]
+ * @prop {string[]} [exclude]
+ * @prop {string[]} [reporters] - text | html | lcov
  */
-export interface CoverageReportArgs {
+export interface CoverageConfig {
+  dir?: string
+  file?: string
   url?: string
   outDir?: string
   srcDir?: string

@@ -21,12 +21,15 @@ export default defineConfig({
       '**/*.test.ts'
     ],
     coverage: {
+      reporter: [
+        'text'
+      ],
       exclude: [
         'lib/',
-        '__tests__/',
         '**/*.test.ts',
         "**/*.config.ts",
         '**/*Types.ts',
+        '*.js'
       ]
     }
   }

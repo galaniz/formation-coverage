@@ -4,14 +4,12 @@
 
 /* Imports */
 
+import type { Page } from '@playwright/test'
 import type { CoverageData } from '../coverageTypes.js'
-import { it, expect, describe, vi, beforeEach } from 'vitest'
+import { it, expect, describe, vi, beforeEach, afterEach } from 'vitest'
 import { fs, vol } from 'memfs'
-import {
-  doCoverage,
-  setupCoverage,
-  createCoverageReport
-} from '../coverage.js'
+import { doCoverage, setupCoverage } from '../coverage.js'
+import { setCoverageConfig } from '../coverageConfig.js'
 
 /**
  * Test directory
@@ -25,7 +23,21 @@ const testDir: string = '/files/testDir'
  *
  * @type {string}
  */
-const testFile: string = 'testFile'
+const testFile: string = 'testFile.json'
+
+/**
+ * Test script one js
+ *
+ * @type {string}
+ */
+const testScript1: string = "export function test(message = 'Hello, world!') {\n    console.info(message);\n}\n//# sourceMappingURL=script1.js.map"
+
+/**
+ * Test script two js
+ *
+ * @type {string}
+ */
+const testScript2: string = "export function other() {\n    return 'something';\n}\n//# sourceMappingURL=script2.js.map"
 
 /**
  * Mock coverage data
@@ -34,40 +46,41 @@ const testFile: string = 'testFile'
  */
 const testCoverageData: CoverageData[] = [
   {
-    url: '/script.js',
-    scriptId: '123',
-    source: "function test() { console.log('Hello, world!'); }",
+    url: '/files/test/script1.js',
+    scriptId: '1',
+    source: testScript1,
     functions: [
       {
         functionName: 'test',
-        isBlockCoverage: true,
+        isBlockCoverage: false,
         ranges: [
-          {
-            count: 1,
+          { // 100% coverage
             startOffset: 0,
-            endOffset: 10
-          },
-          {
-            count: 2,
-            startOffset: 15,
-            endOffset: 50
+            endOffset: 67,
+            count: 1
           }
         ]
       }
     ]
   },
   {
-    url: 'http://example.com/other-script.js',
-    scriptId: '456',
+    url: '/files/test/script2.js',
+    scriptId: '2',
+    source: testScript2,
     functions: [
       {
-        functionName: 'otherFunction',
+        functionName: 'other',
         isBlockCoverage: false,
         ranges: [
-          {
-            count: 0,
-            startOffset: 5,
-            endOffset: 25
+          { // 50% coverage
+            startOffset: 0,
+            endOffset: 25,
+            count: 1
+          },
+          { // Uncovered
+            startOffset: 26,
+            endOffset: 50,
+            count: 0
           }
         ]
       }
@@ -75,21 +88,32 @@ const testCoverageData: CoverageData[] = [
   }
 ]
 
+/* Set and reset directory and file */
+
+beforeEach(() => {
+  setCoverageConfig({
+    dir: testDir,
+    file: testFile
+  })
+})
+
+afterEach(() => {
+  setCoverageConfig({
+    dir: 'formation-coverage',
+    file: 'formation-coverage.json'
+  })
+})
+
 /* Test setupCoverage */
 
 describe('setupCoverage()', () => {
-  it('should throw error from empty dir name and file name', async () => {
-    // @ts-expect-error
-    await expect(async () => await setupCoverage()).rejects.toThrowError()
-  })
-
   it('should throw an error if access EACCES', async () => {
     vi.spyOn(fs.promises, 'access').mockRejectedValueOnce(new Error('EACCES'))
     vol.fromJSON({
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => await setupCoverage(testDir, testFile)).rejects.toThrowError('EACCES')
+    await expect(async () => { await setupCoverage() }).rejects.toThrowError('EACCES')
   })
 
   it('should throw an error if rm EPERM', async () => {
@@ -98,14 +122,14 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => await setupCoverage(testDir, testFile)).rejects.toThrowError('EPERM')
+    await expect(async () => { await setupCoverage() }).rejects.toThrowError('EPERM')
   })
 
   it('should create directory and file', async () => {
-    await setupCoverage(testDir, testFile)
+    await setupCoverage()
 
     const files = vol.toJSON()
-    const file = files[`${testDir}/${testFile}.json`]
+    const file = files[`${testDir}/${testFile}`]
 
     expect(file).toBeDefined()
   })
@@ -115,10 +139,10 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': '[{"test":"test"}]'
     })
 
-    await setupCoverage(testDir, testFile)
+    await setupCoverage()
 
     const files = vol.toJSON()
-    const file = files[`${testDir}/${testFile}.json`]
+    const file = files[`${testDir}/${testFile}`]
     const expectedFileContent = ''
 
     expect(file).toBeDefined()
@@ -135,6 +159,10 @@ describe('doCoverage()', () => {
     })
   })
 
+  afterEach(() => {
+    process.env.FORMATION_COVERAGE_FILE = '/files/testDir/testFile.json'
+  })
+
   it('should not append to coverage file if browser is webkit', async () => {
     const testPage = {
       coverage: {
@@ -143,13 +171,26 @@ describe('doCoverage()', () => {
       }
     }
 
-    await doCoverage('webkit', testPage as any, true)
+    await doCoverage('webkit', testPage as unknown as Page, true)
 
     const files = vol.toJSON()
-    const file = files[`${testDir}/${testFile}.json`]
+    const file = files[`${testDir}/${testFile}`]
     const expectedFileContent = ''
 
     expect(file).toBe(expectedFileContent)
+  })
+
+  it('should throw an error if file path environment variable is null', async () => {
+    const testPage = {
+      coverage: {
+        startJSCoverage: vi.fn().mockResolvedValue(undefined),
+        stopJSCoverage: vi.fn().mockResolvedValue(testCoverageData)
+      }
+    }
+
+    delete process.env.FORMATION_COVERAGE_FILE
+
+    await expect(async () => { await doCoverage('chromium', testPage as unknown as Page, false) }).rejects.toThrowError('No formation coverage file path')
   })
 
   it('should start coverage', async () => {
@@ -163,10 +204,10 @@ describe('doCoverage()', () => {
       }
     }
 
-    await doCoverage('chromium', testPage as any, true)
+    await doCoverage('chromium', testPage as unknown as Page, true)
 
     const files = vol.toJSON()
-    const file = files[`${testDir}/${testFile}.json`]
+    const file = files[`${testDir}/${testFile}`]
     const expectedFileContent = ''
 
     expect(start).toHaveBeenCalledTimes(1)
@@ -185,10 +226,10 @@ describe('doCoverage()', () => {
       }
     }
 
-    await doCoverage('chromium', testPage as any, false)
+    await doCoverage('chromium', testPage as unknown as Page, false)
 
     const files = vol.toJSON()
-    const file = files[`${testDir}/${testFile}.json`]
+    const file = files[`${testDir}/${testFile}`]
     const expectedFileContent = JSON.stringify(testCoverageData) + '*|FRM_BREAK|*'
 
     expect(start).not.toHaveBeenCalled()

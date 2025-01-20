@@ -17,20 +17,18 @@
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
+    "removeComments": true,
     "outDir": "lib",
     "lib": [
       "es2022"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.test.ts",
-    "**/*.config.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "lib",
     "node_modules",
-    "**/*.test.ts",
-    "**/*.config.ts"
+    "coverage"
   ]
 }
