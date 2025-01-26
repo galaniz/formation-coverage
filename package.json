@@ -1,6 +1,6 @@
 {
   "name": "@alanizcreative/formation-coverage",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Utility to generate code coverage reports for Playwright tests from TypeScript source code",
   "main": "./lib/coverage.js",
   "packageManager": "pnpm@9.14.4",
