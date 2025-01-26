@@ -78,7 +78,7 @@
       "release": true
     }
   },
-  "publishconfig": {
+  "publishConfig": {
     "access": "public"
   }
 }
