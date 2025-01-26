@@ -1,0 +1,48 @@
+name: Lint and Test
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write # Add broader permissions
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      # Set up node.js for pnpm
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      # Install pnpm dependencies
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Lint files
+      - name: Run lint
+        run: pnpm lint
+
+      # Test files
+      - name: Run test
+        run: pnpm test
+        env:
+          TEMP: ${{ runner.temp }} # Use GitHub's temp directory

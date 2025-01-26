@@ -1,0 +1,42 @@
+name: Publish Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      # Set up node.js for pnpm
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      # Npm authentication
+      - name: Set npm auth token
+        run: pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+
+      # Install pnpm dependencies
+      - name: Install dependencies
+        run: pnpm install
+
+      # Build lib files
+      - name: Build project
+        run: pnpm build
+
+      # Release
+      - name: Publish release
+        run: pnpm release

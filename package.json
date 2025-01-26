@@ -1,8 +1,9 @@
 {
   "name": "@alanizcreative/formation-coverage",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Utility to generate code coverage reports for Playwright tests from TypeScript source code",
   "main": "./lib/coverage.js",
+  "packageManager": "pnpm@9.14.4",
   "type": "module",
   "files": [
     "./lib"
@@ -17,9 +18,21 @@
     "lint": "npx eslint .",
     "test": "vitest --run --reporter verbose --coverage"
   },
-  "keywords": [],
+  "keywords": [
+    "playwright",
+    "typescript",
+    "code-coverage",
+    "testing",
+    "coverage-report",
+    "test-coverage",
+    "javascript",
+    "development"
+  ],
   "author": "Graciela Alaniz (https://alanizcreative.com/)",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "glob": "11.0.0",
     "istanbul-lib-coverage": "^3.2.2",
@@ -39,11 +52,21 @@
     "@vitest/coverage-v8": "2.1.5",
     "eslint": "9.15.0",
     "memfs": "4.15.0",
+    "release-it": "18.0.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "8.19.1",
     "vitest": "2.1.5"
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0"
+  },
+  "release-it": {
+    "git": {
+      "requireCommits": true,
+      "commitMessage": "chore: release ${version} [ci skip]"
+    },
+    "github": {
+      "release": true
+    }
   }
 }

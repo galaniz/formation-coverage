@@ -161,7 +161,7 @@ describe('createCoverageReport()', () => {
   let coverageDir: string
 
   beforeAll(async () => {
-    tempDir = await mkdtemp(join(tmpdir()))
+    tempDir = await mkdtemp(join(process.env.TEMP || tmpdir(), 'test-'))
     outDir = join(tempDir, 'test')
     srcDir = join(tempDir, 'src')
     coverageDir = join(tempDir, 'formation-coverage')
