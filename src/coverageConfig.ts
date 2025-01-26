@@ -15,8 +15,8 @@ let coverageConfig: Required<CoverageConfig> = {
   dir: 'formation-coverage',
   file: 'formation-coverage.json',
   url: 'http://localhost:3000',
-  reporters: [],
-  outDir: 'test',
+  reporters: ['text'],
+  outDir: 'spec',
   srcDir: 'src',
   include: [],
   exclude: []

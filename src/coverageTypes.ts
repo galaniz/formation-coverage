@@ -76,7 +76,7 @@ export type CoverageReportExclude = (entry: string) => boolean
  * @prop {string} [dir=formation-coverage]
  * @prop {string} [file=formation-coverage.json]
  * @prop {string} [url=http://localhost:3000]
- * @prop {string} [outDir=test]
+ * @prop {string} [outDir=spec]
  * @prop {string} [srcDir=src]
  * @prop {string[]} [include]
  * @prop {string[]} [exclude]
