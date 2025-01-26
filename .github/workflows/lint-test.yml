@@ -13,6 +13,9 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write # Add broader permissions
 
     steps:
       # Checkout the repository
@@ -41,3 +44,5 @@ jobs:
       # Test files
       - name: Run test
         run: pnpm test
+        env:
+          TEMP: ${{ runner.temp }} # Use GitHub's temp directory
