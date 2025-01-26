@@ -29,6 +29,14 @@
     "javascript",
     "development"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaniz/formation-coverage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/galaniz/formation-coverage/issues"
+  },
+  "homepage": "https://github.com/galaniz/formation-coverage#readme",
   "author": "Graciela Alaniz (https://alanizcreative.com/)",
   "license": "MIT",
   "engines": {
@@ -69,5 +77,8 @@
     "github": {
       "release": true
     }
+  },
+  "publishconfig": {
+    "access": "public"
   }
 }
