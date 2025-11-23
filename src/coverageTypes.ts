@@ -73,22 +73,22 @@ export type CoverageReportExclude = (entry: string) => boolean
 
 /**
  * @typedef {object} CoverageConfig
- * @prop {string} [dir=formation-coverage]
- * @prop {string} [file=formation-coverage.json]
- * @prop {string} [url=http://localhost:3000]
- * @prop {string} [outDir=spec]
- * @prop {string} [srcDir=src]
- * @prop {string[]} [include]
- * @prop {string[]} [exclude]
- * @prop {string[]} [reporters] - text | html | lcov
+ * @prop {string} [dir='formation-coverage'] - Directory for coverage file and reports.
+ * @prop {string} [file='formation-coverage.json'] - File name to store test coverage data.
+ * @prop {string} [url='http://localhost:3000'] - Web server URL tests run on.
+ * @prop {Array<'text'|'html'|'lcov'>} [reporters=['text']] - Coverage [report formats](https://www.npmjs.com/package/@types/istanbul-reports).
+ * @prop {string} [outDir='spec'] - Directory with compiled and source map files.
+ * @prop {string} [srcDir='src'] - Directory with source TypeScript files.
+ * @prop {string[]} [include] - Glob patterns to include in reports.
+ * @prop {string[]} [exclude] - Glob patterns to exclude from reports.
  */
 export interface CoverageConfig {
   dir?: string
   file?: string
   url?: string
+  reporters?: Array<keyof ReportOptions>
   outDir?: string
   srcDir?: string
   include?: string[]
   exclude?: string[]
-  reporters?: Array<keyof ReportOptions>
 }

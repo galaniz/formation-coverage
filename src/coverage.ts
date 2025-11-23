@@ -1,11 +1,30 @@
 /**
  * Coverage
+ *
+ * @file
+ * title: Formation Coverage
+ * Utility to generate code coverage reports for Playwright tests specifically for TypeScript source code.
+ *
+ * @example
+ * title: Installation
+ * shell: npm install -D @alanizcreative/formation-coverage
+ *
+ * @example
+ * title: TypeScript Configuration
+ * desc: Ensure your `tsconfig.json` includes the following compiler options to enable source map generation:
+ * json: {
+ *   "compilerOptions": {
+ *     "sourceMap": true,
+ *     "inlineSourceMap": false,
+ *     "inlineSources": true
+ *   }
+ * }
  */
 
 /* Imports */
 
 import type { Page } from '@playwright/test'
-import type { CoverageData, CoverageSourceMap } from './coverageTypes.js'
+import type { CoverageConfig, CoverageData, CoverageSourceMap } from './coverageTypes.js'
 import { mkdir, appendFile, writeFile, readFile, access, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { glob } from 'glob'
@@ -17,8 +36,9 @@ import reports from 'istanbul-reports'
 import v8toIstanbul from 'v8-to-istanbul'
 
 /**
- * Coverage directory or file
+ * Coverage directory or file.
  *
+ * @private
  * @param {boolean} [isFile]
  * @return {string}
  */
@@ -33,46 +53,15 @@ const getCoveragePath = (isFile: boolean = true): string => {
 }
 
 /**
- * Separator for file data
+ * Separator for file data.
  *
+ * @private
  * @type {string}
  */
 const coverageBreak: string = '*|FRM_BREAK|*'
 
 /**
- * Start and end playwright coverage and save to coverage file
- *
- * @param {string} browserName
- * @param {Page} page
- * @param {boolean} [start=true]
- * @return {Promise<void>}
- */
-const doCoverage = async (
-  browserName: string,
-  page: Page,
-  start: boolean = true
-): Promise<void> => {
-  if (browserName !== 'chromium') {
-    return
-  }
-
-  if (start) {
-    await page.coverage.startJSCoverage()
-    return
-  }
-
-  const result = await page.coverage.stopJSCoverage()
-  const filePath = process.env.FORMATION_COVERAGE_FILE
-
-  if (filePath == null) {
-    throw new Error('No formation coverage file path')
-  }
-
-  await appendFile(filePath, JSON.stringify(result) + coverageBreak)
-}
-
-/**
- * Convert playwright coverage data
+ * Convert Playwright coverage data.
  *
  * @private
  * @param {string} testUrl
@@ -101,11 +90,49 @@ const loadCoverage = async (testUrl: string, urlAbs: boolean = false): Promise<C
 }
 
 /**
- * Create coverage folder and file
- *
- * @return {void}
+ * Set options and create coverage folder and file.
+ * 
+ * @example
+ * desc: It's recommended to configure coverage options in your Playwright `globalSetup` file:
+ * ts: // tests/setup.ts
+ * 
+ * import { setupCoverage } from '@alanizcreative/formation-coverage/coverage.js'
+ * 
+ * export default async function () {
+ *   await setupCoverage({
+ *     dir: 'spec-coverage',
+ *     file: 'spec-coverage.json',
+ *     url: 'http://localhost:8000',
+ *     outDir: 'spec',
+ *     srcDir: 'src',
+ *     reporters: [
+ *       'text',
+ *       'html'
+ *     ],
+ *     include: [
+ *       'spec/components/**\/*.js',
+ *       'spec/effects/**\/*.js',
+ *       'spec/layouts/**\/*.js',
+ *       'spec/objects/**\/*.js'
+ *     ],
+ *     exclude: [
+ *       'spec/utils/**\/*.js',
+ *       'spec/config/**\/*.js',
+ *       'spec/tests/**\/*.js',
+ *       'spec/**\/*.spec.js'
+ *     ]
+ *   })
+ * }
+ * @param {CoverageConfig} args
+ * @return {Promise<void>}
  */
-const setupCoverage = async (): Promise<void> => {
+const setupCoverage = async (args: CoverageConfig): Promise<void> => {
+  /* Set config */
+
+  Object.entries(args).forEach(([key, value]) => {
+    coverageConfig[key as keyof CoverageConfig] = value // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+  })
+
   /* Directory and file */
 
   const dir = getCoveragePath(false)
@@ -134,8 +161,67 @@ const setupCoverage = async (): Promise<void> => {
 }
 
 /**
- * Create coverage report from json data
+ * Start and end Playwright coverage and save to coverage file.
+ * 
+ * @example
+ * desc: Use `doCoverage` before and after each test to capture coverage data:
+ * ts: // components/Navigation/__tests__/Navigation.spec.ts
+ * 
+ * import { test, expect } from '@playwright/test'
+ * import { doCoverage } from '@alanizcreative/formation-coverage/coverage.js'
+ * 
+ * test.describe('Navigation', () => {
+ *   test.beforeEach(async ({ browserName, page }) => {
+ *     await doCoverage(browserName, page, true)
+ *   })
+ * 
+ *   test.afterEach(async ({ browserName, page }) => {
+ *     await doCoverage(browserName, page, false)
+ *   })
+ * 
+ *   // Your test cases
+ * })
+ * @param {string} browserName - Coverage only applies to Chromium browsers.
+ * @param {Page} page - [Page](https://playwright.dev/docs/api/class-page) object provided by Playwright.
+ * @param {boolean} [start=true] - Start or stop coverage.
+ * @return {Promise<void>}
+ */
+const doCoverage = async (
+  browserName: string,
+  page: Page,
+  start: boolean = true
+): Promise<void> => {
+  if (browserName !== 'chromium') {
+    return
+  }
+
+  if (start) {
+    await page.coverage.startJSCoverage()
+    return
+  }
+
+  const result = await page.coverage.stopJSCoverage()
+  const filePath = process.env.FORMATION_COVERAGE_FILE
+
+  if (filePath == null) {
+    throw new Error('No formation coverage file path')
+  }
+
+  await appendFile(filePath, JSON.stringify(result) + coverageBreak)
+}
+
+/**
+ * Create coverage report from JSON data.
  *
+ * @example
+ * desc: Generate coverage reports after tests complete in your Playwright `globalTeardown` file:
+ * ts: // tests/teardown.ts
+ * 
+ * import { createCoverageReport } from '@alanizcreative/formation-coverage/coverage.js'
+ * 
+ * export default async function () {
+ *   await createCoverageReport()
+ * }
  * @return {Promise<void>}
  */
 const createCoverageReport = async (): Promise<void> => {
@@ -154,7 +240,7 @@ const createCoverageReport = async (): Promise<void> => {
 
   const coverageDir = getCoveragePath(false)
 
-  /* Url type */
+  /* URL type */
 
   const isAbs = testUrl.startsWith('/')
   const relDir = isAbs ? '' : './'
@@ -204,10 +290,9 @@ const createCoverageReport = async (): Promise<void> => {
     const instrumenter = createInstrumenter({ produceSourceMap: true })
     instrumenter.instrumentSync(jsFileContents, jsfilePath, mapFileJson)
 
-    tsEntry[tsFilePath] = {
-      ...instrumenter.fileCoverage,
+    tsEntry[tsFilePath] = Object.assign(instrumenter.fileCoverage, {
       path: tsFilePath
-    }
+    })
 
     coverageMap.merge(tsEntry)
   }
@@ -233,7 +318,7 @@ const createCoverageReport = async (): Promise<void> => {
 /* Exports */
 
 export {
-  doCoverage,
   setupCoverage,
+  doCoverage,
   createCoverageReport
 }

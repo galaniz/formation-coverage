@@ -9,8 +9,8 @@ import { it, expect, describe, vi, beforeAll, afterAll } from 'vitest'
 import { rm, mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { coverageConfig } from '../coverageConfig.js'
 import { setupCoverage, createCoverageReport } from '../coverage.js'
-import { setCoverageConfig } from '../coverageConfig.js'
 
 /* Use temporary fs instead of memfs */
 
@@ -18,77 +18,77 @@ vi.unmock('node:fs')
 vi.unmock('node:fs/promises')
 
 /**
- * Test script one js
+ * Test script one js.
  *
  * @type {string}
  */
 const testScript1: string = "export function test(message = 'Hello, world!') {\n    console.info(message);\n}\n//# sourceMappingURL=script1.js.map"
 
 /**
- * Test script one ts
+ * Test script one ts.
  *
  * @type {string}
  */
 const testScriptTs1: string = "export function test(message: string = 'Hello, world!'): void {\n  console.info(message);\n}"
 
 /**
- * Test script two js
+ * Test script two js.
  *
  * @type {string}
  */
 const testScript2: string = "export function other() {\n    return 'something';\n}\n//# sourceMappingURL=script2.js.map"
 
 /**
- * Test script two ts
+ * Test script two ts.
  *
  * @type {string}
  */
 const testScriptTs2: string = "export function other(): string {\n  return 'something';\n}"
 
 /**
- * Test script three js
+ * Test script three js.
  *
  * @type {string}
  */
 const testScript3: string = 'export function add(a, b) {\n    if (!a) {\n        return 0;\n    }\n    return a + b;\n}\n//# sourceMappingURL=script3.js.map'
 
 /**
- * Test script three ts
+ * Test script three ts.
  *
  * @type {string}
  */
 const testScriptTs3: string = 'export function add(a: number, b: number): number {\n  if (!a) { return 0; }\n  return a + b;\n}'
 
 /**
- * Test script four js
+ * Test script four js.
  *
  * @type {string}
  */
 const testScript4: string = 'export function multiply(a, b) {\n    return a * b;\n}\n//# sourceMappingURL=script4.js.map'
 
 /**
- * Test script four ts
+ * Test script four ts.
  *
  * @type {string}
  */
 const testScriptTs4: string = 'export function multiply(a: number, b: number): number {\n  return a * b;\n}'
 
 /**
- * Test script five js
+ * Test script five js.
  *
  * @type {string}
  */
 const testScript5: string = 'export function divide(a, b) {\n    return a / b;\n}\n//# sourceMappingURL=script5.js.map'
 
 /**
- * Test script five ts
+ * Test script five ts.
  *
  * @type {string}
  */
 const testScriptTs5: string = 'export function divide(a: number, b: number): number {\n  return a / b;\n}'
 
 /**
- * Test lcov output
+ * Test lcov output.
  * 
  * @type {string}
  */
@@ -269,7 +269,7 @@ describe('createCoverageReport()', () => {
       JSON.stringify(coverageData2) +
       '*|FRM_BREAK|*'
 
-    setCoverageConfig({
+    await setupCoverage({
       dir: coverageDir,
       file: `${coverageDir}/formation-coverage.json`,
       url: outDir,
@@ -286,7 +286,6 @@ describe('createCoverageReport()', () => {
       ]
     })
 
-    await setupCoverage()
     await writeFile(`${coverageDir}/formation-coverage.json`, data)
     await writeFile(`${srcDir}/script1.ts`, testScriptTs1)
     await writeFile(`${srcDir}/script2.ts`, testScriptTs2)
@@ -308,16 +307,14 @@ describe('createCoverageReport()', () => {
   afterAll(async () => {
     await rm(tempDir, { recursive: true, force: true })
 
-    setCoverageConfig({
-      dir: 'formation-coverage',
-      file: 'formation-coverage.json',
-      url: 'http://localhost:3000',
-      reporters: [],
-      outDir: 'test',
-      srcDir: 'src',
-      include: [],
-      exclude: []
-    })
+    coverageConfig.dir = 'formation-coverage'
+    coverageConfig.file = 'formation-coverage.json'
+    coverageConfig.url = 'http://localhost:3000'
+    coverageConfig.reporters = []
+    coverageConfig.outDir = 'spec'
+    coverageConfig.srcDir = 'src'
+    coverageConfig.include = []
+    coverageConfig.exclude = []
   })
 
   it('should load coverage and create report', async () => {
