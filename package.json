@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "description": "Utility to generate code coverage reports for Playwright tests from TypeScript source code",
   "main": "./lib/coverage.js",
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@10.23.0",
   "type": "module",
   "files": [
     "./lib"
@@ -14,7 +14,8 @@
     }
   },
   "scripts": {
-    "build": "npx tsc --project tsconfig.build.json",
+    "build": "npx tsc --project tsconfig.build.json && pnpm minify",
+    "minify": "find lib -name \"*.js\" -exec terser {} -o {} --compress \\;",
     "lint": "npx eslint .",
     "test": "vitest --run --reporter verbose --coverage",
     "release": "release-it"
@@ -22,12 +23,7 @@
   "keywords": [
     "playwright",
     "typescript",
-    "code-coverage",
-    "testing",
-    "coverage-report",
-    "test-coverage",
-    "javascript",
-    "development"
+    "code-coverage"
   ],
   "repository": {
     "type": "git",
@@ -40,45 +36,53 @@
   "author": "Graciela Alaniz (https://alanizcreative.com/)",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
-    "glob": "11.0.0",
+    "glob": "13.0.0",
     "istanbul-lib-coverage": "^3.2.2",
     "istanbul-lib-instrument": "6.0.3",
     "istanbul-lib-report": "^3.0.1",
-    "istanbul-reports": "^3.1.7",
+    "istanbul-reports": "^3.2.0",
     "v8-to-istanbul": "^9.3.0"
   },
   "devDependencies": {
     "@types/istanbul-lib-coverage": "2.0.6",
-    "@types/istanbul-lib-instrument": "1.7.7",
+    "@types/istanbul-lib-instrument": "1.7.8",
     "@types/istanbul-lib-report": "^3.0.3",
     "@types/istanbul-reports": "^3.0.4",
-    "@types/node": "^22.10.1",
-    "@typescript-eslint/eslint-plugin": "8.19.1",
-    "@typescript-eslint/parser": "8.19.1",
-    "@vitest/coverage-v8": "2.1.5",
-    "eslint": "9.15.0",
-    "memfs": "4.15.0",
-    "release-it": "18.0.0",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "8.19.1",
-    "vitest": "2.1.5"
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "8.47.0",
+    "@typescript-eslint/parser": "8.47.0",
+    "@vitest/coverage-v8": "4.0.13",
+    "eslint": "9.39.1",
+    "memfs": "4.51.0",
+    "release-it": "19.0.6",
+    "terser": "5.44.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "8.47.0",
+    "vitest": "4.0.13"
   },
   "peerDependencies": {
-    "@playwright/test": "^1.49.0"
+    "@playwright/test": "^1.53.0"
   },
   "release-it": {
     "git": {
       "requireCommits": true,
-      "commitMessage": "chore: release ${version} [ci skip]"
+      "commitMessage": "chore: release ${version} [ci skip]",
+      "tag": true,
+      "push": true
     },
     "github": {
       "release": true
+    },
+    "npm": {
+      "publish": true,
+      "skipChecks": true
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

@@ -1,10 +1,10 @@
-# Formation Coverage
+# Formation Coverage  
 
-A utility to generate code coverage reports for Playwright tests specifically for TypeScript source code.
+Utility to generate code coverage reports for Playwright tests specifically for TypeScript source code.
 
 ## Installation
 
-```bash
+```shell
 npm install -D @alanizcreative/formation-coverage
 ```
 
@@ -22,35 +22,30 @@ Ensure your `tsconfig.json` includes the following compiler options to enable so
 }
 ```
 
-## Configuration Options
+## setupCoverage  
 
-### `setCoverageConfig`
+**<code>setupCoverage(args: CoverageConfig): Promise&lt;void&gt;</code>**  
 
-| Option        | Type          | Default                      | Description                                     |
-|---------------|---------------|------------------------------|-------------------------------------------------|
-| `dir`         | `string`      | `'formation-coverage'`       | Directory for coverage file and reports         |
-| `file`        | `string`      | `'formation-coverage.json'`  | File name to store test coverage data           |
-| `url`         | `string`      | `'http://localhost:3000'`    | Web server url tests run on                     |
-| `reporters`   | `string[]`    | `['text']`                   | Coverage report formats (see [Istanbul Report Options](https://www.npmjs.com/package/@types/istanbul-reports)) |
-| `outDir`      | `string`      | `'spec'`                     | Directory with compiled and source map files    |
-| `srcDir`      | `string`      | `'src'`                      | Directory with source TypeScript files          |
-| `include`     | `string[]`    | `[]`                         | Glob patterns to include in reports             |
-| `exclude`     | `string[]`    | `[]`                         | Glob patterns to exclude from reports           |
+Set options and create coverage folder and file.
 
-## Setup Guide
+### Parameters  
+- **`args`** <code><a href="#coverageconfig">CoverageConfig</a></code> required
 
-### Global Setup
+### Returns  
+
+<code>Promise&lt;void&gt;</code>
+
+### Examples
 
 It's recommended to configure coverage options in your Playwright `globalSetup` file:
 
-```typescript
+```ts
 // tests/setup.ts
 
-import { setCoverageConfig } from '@alanizcreative/formation-coverage/coverageConfig.js'
 import { setupCoverage } from '@alanizcreative/formation-coverage/coverage.js'
 
 export default async function () {
-  setCoverageConfig({
+  await setupCoverage({
     dir: 'spec-coverage',
     file: 'spec-coverage.json',
     url: 'http://localhost:8000',
@@ -61,36 +56,45 @@ export default async function () {
       'html'
     ],
     include: [
-      'spec/components/**/*.js',
-      'spec/effects/**/*.js',
-      'spec/layouts/**/*.js',
-      'spec/objects/**/*.js'
+      'spec/components/**\/*.js',
+      'spec/effects/**\/*.js',
+      'spec/layouts/**\/*.js',
+      'spec/objects/**\/*.js'
     ],
     exclude: [
-      'spec/utils/**/*.js',
-      'spec/config/**/*.js',
-      'spec/tests/**/*.js',
-      'spec/**/*.spec.js'
+      'spec/utils/**\/*.js',
+      'spec/config/**\/*.js',
+      'spec/tests/**\/*.js',
+      'spec/**\/*.spec.js'
     ]
   })
-
-  await setupCoverage()
 }
 ```
 
-### Test Setup
+## doCoverage  
 
-#### `doCoverage`
+**<code>doCoverage(browserName: string, page: Page, start?: boolean): Promise&lt;void&gt;</code>**  
 
-| Param             | Type                     | Default          | Description                                    |
-|-------------------|--------------------------|------------------|------------------------------------------------|
-| `browserName`     | `string`                 |                  | Coverage only applies to chromium browsers     |
-| `page`            | `@playwright/test.Page`  |                  | [Page](https://playwright.dev/docs/api/class-page) object provided by Playwright |
-| `start`           | `boolean`                | `true`           | Start or stop coverage                         |
+Start and end Playwright coverage and save to coverage file.
 
-Use `doCoverage` before and after each test to capture coverage data: 
+### Parameters  
+- **`browserName`** <code>string</code> required  
+Coverage only applies to Chromium browsers.  
+- **`page`** <code>Page</code> required  
+[Page](https://playwright.dev/docs/api/class-page) object provided by Playwright.  
+- **`start`** <code>boolean</code> optional  
+Start or stop coverage.  
+Default: `true`
 
-```typescript
+### Returns  
+
+<code>Promise&lt;void&gt;</code>
+
+### Examples
+
+Use `doCoverage` before and after each test to capture coverage data:
+
+```ts
 // components/Navigation/__tests__/Navigation.spec.ts
 
 import { test, expect } from '@playwright/test'
@@ -109,11 +113,21 @@ test.describe('Navigation', () => {
 })
 ```
 
-### Global Teardown
+## createCoverageReport  
+
+**<code>createCoverageReport(): Promise&lt;void&gt;</code>**  
+
+Create coverage report from JSON data.
+
+### Returns  
+
+<code>Promise&lt;void&gt;</code>
+
+### Examples
 
 Generate coverage reports after tests complete in your Playwright `globalTeardown` file:
 
-```typescript
+```ts
 // tests/teardown.ts
 
 import { createCoverageReport } from '@alanizcreative/formation-coverage/coverage.js'
@@ -122,3 +136,33 @@ export default async function () {
   await createCoverageReport()
 }
 ```
+
+## Types
+
+### CoverageConfig  
+
+**Type:** <code>object</code>
+
+#### Properties  
+- **`dir`** <code>string</code> optional  
+Directory for coverage file and reports.  
+Default: `'formation-coverage'`  
+- **`file`** <code>string</code> optional  
+File name to store test coverage data.  
+Default: `'formation-coverage.json'`  
+- **`url`** <code>string</code> optional  
+Web server URL tests run on.  
+Default: `'http://localhost:3000'`  
+- **`reporters`** <code>(&#39;text&#39;|&#39;html&#39;|&#39;lcov&#39;)[]</code> optional  
+Coverage [report formats](https://www.npmjs.com/package/@types/istanbul-reports).  
+Default: `['text']`  
+- **`outDir`** <code>string</code> optional  
+Directory with compiled and source map files.  
+Default: `'spec'`  
+- **`srcDir`** <code>string</code> optional  
+Directory with source TypeScript files.  
+Default: `'src'`  
+- **`include`** <code>string[]</code> optional  
+Glob patterns to include in reports.  
+- **`exclude`** <code>string[]</code> optional  
+Glob patterns to exclude from reports.

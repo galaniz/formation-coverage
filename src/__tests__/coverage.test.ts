@@ -8,39 +8,39 @@ import type { Page } from '@playwright/test'
 import type { CoverageData } from '../coverageTypes.js'
 import { it, expect, describe, vi, beforeEach, afterEach } from 'vitest'
 import { fs, vol } from 'memfs'
+import { coverageConfig } from '../coverageConfig.js'
 import { doCoverage, setupCoverage } from '../coverage.js'
-import { setCoverageConfig } from '../coverageConfig.js'
 
 /**
- * Test directory
+ * Test directory.
  *
  * @type {string}
  */
 const testDir: string = '/files/testDir'
 
 /**
- * Test coverage file
+ * Test coverage file.
  *
  * @type {string}
  */
 const testFile: string = 'testFile.json'
 
 /**
- * Test script one js
+ * Test script one js.
  *
  * @type {string}
  */
 const testScript1: string = "export function test(message = 'Hello, world!') {\n    console.info(message);\n}\n//# sourceMappingURL=script1.js.map"
 
 /**
- * Test script two js
+ * Test script two js.
  *
  * @type {string}
  */
 const testScript2: string = "export function other() {\n    return 'something';\n}\n//# sourceMappingURL=script2.js.map"
 
 /**
- * Mock coverage data
+ * Mock coverage data.
  *
  * @type {CoverageData[]}
  */
@@ -91,29 +91,35 @@ const testCoverageData: CoverageData[] = [
 /* Set and reset directory and file */
 
 beforeEach(() => {
-  setCoverageConfig({
-    dir: testDir,
-    file: testFile
-  })
+  coverageConfig.dir = testDir
+  coverageConfig.file = testFile
 })
 
 afterEach(() => {
-  setCoverageConfig({
-    dir: 'formation-coverage',
-    file: 'formation-coverage.json'
-  })
+  coverageConfig.dir = 'formation-coverage'
+  coverageConfig.file = 'formation-coverage.json'
 })
 
 /* Test setupCoverage */
 
 describe('setupCoverage()', () => {
+  const coverageArgs = {
+    dir: testDir,
+    file: testFile
+  }
+
+  it('should throw an error if no args', async () => {
+    // @ts-expect-error - test empty args
+    await expect(async () => { await setupCoverage() }).rejects.toThrowError()
+  })
+
   it('should throw an error if access EACCES', async () => {
     vi.spyOn(fs.promises, 'access').mockRejectedValueOnce(new Error('EACCES'))
     vol.fromJSON({
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => { await setupCoverage() }).rejects.toThrowError('EACCES')
+    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrowError('EACCES')
   })
 
   it('should throw an error if rm EPERM', async () => {
@@ -122,15 +128,17 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => { await setupCoverage() }).rejects.toThrowError('EPERM')
+    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrowError('EPERM')
   })
 
-  it('should create directory and file', async () => {
-    await setupCoverage()
+  it('should set options and create directory and file', async () => {
+    await setupCoverage(coverageArgs)
 
     const files = vol.toJSON()
     const file = files[`${testDir}/${testFile}`]
 
+    expect(coverageConfig.dir).toBe(testDir)
+    expect(coverageConfig.file).toBe(testFile)
     expect(file).toBeDefined()
   })
 
@@ -139,7 +147,7 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': '[{"test":"test"}]'
     })
 
-    await setupCoverage()
+    await setupCoverage(coverageArgs)
 
     const files = vol.toJSON()
     const file = files[`${testDir}/${testFile}`]
