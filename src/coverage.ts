@@ -65,10 +65,9 @@ const coverageBreak: string = '*|FRM_BREAK|*'
  *
  * @private
  * @param {string} testUrl
- * @param {boolean} urlAbs
  * @return {Promise<CoverageMapData[]>}
  */
-const loadCoverage = async (testUrl: string, urlAbs: boolean = false): Promise<CoverageData[]> => {
+const loadCoverage = async (testUrl: string): Promise<CoverageData[]> => {
   const fileData = await readFile(getCoveragePath(), 'utf8')
   const entries = fileData.split(coverageBreak).filter(Boolean)
   const coverage: CoverageData[] = entries.map(entry => JSON.parse(entry) as CoverageData).flat(Infinity)
@@ -80,10 +79,10 @@ const loadCoverage = async (testUrl: string, urlAbs: boolean = false): Promise<C
       return entry
     }
 
-    const sourceFile = url.replace('.js', '.js.map').replace(urlAbs ? '' : `${testUrl}/`, '')
+    const sourceFile = url.replace('.js', '.js.map').replace(`${testUrl}/`, '')
 
     entry.source = source.replace(/sourceMappingURL=([^]+)\.map/, `sourceMappingURL=${sourceFile}`)
-    entry.url = urlAbs ? url : url.replace(`${testUrl}/`, './')
+    entry.url = url.replace(`${testUrl}/`, './')
 
     return entry
   })
@@ -239,11 +238,7 @@ const createCoverageReport = async (): Promise<void> => {
   /* Dir */
 
   const coverageDir = getCoveragePath(false)
-
-  /* URL type */
-
-  const isAbs = testUrl.startsWith('/')
-  const relDir = isAbs ? '' : './'
+  const relDir = testUrl.startsWith('/') ? '' : './'
 
   /* Files to include in report */
 
@@ -252,7 +247,7 @@ const createCoverageReport = async (): Promise<void> => {
 
   /* Coverage data map */
 
-  const coverageData = await loadCoverage(testUrl, isAbs)
+  const coverageData = await loadCoverage(testUrl)
   const coverageMap = libCoverage.createCoverageMap()
   const covered: string[] = []
 

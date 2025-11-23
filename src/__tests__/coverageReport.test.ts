@@ -272,7 +272,7 @@ describe('createCoverageReport()', () => {
     await setupCoverage({
       dir: coverageDir,
       file: `${coverageDir}/formation-coverage.json`,
-      url: outDir,
+      url: '/',
       outDir,
       srcDir,
       exclude: [
