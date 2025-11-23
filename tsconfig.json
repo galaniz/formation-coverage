@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "skipLibCheck": true,
+    "target": "es2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "allowJs": true,
@@ -17,7 +18,10 @@
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     "removeComments": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "lib": [
+      "es2022"
+    ]
   },
   "include": [
     "**/*.ts"
