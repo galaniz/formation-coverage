@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      # Checkout the repository
+      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
