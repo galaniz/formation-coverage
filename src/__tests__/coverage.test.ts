@@ -110,7 +110,7 @@ describe('setupCoverage()', () => {
 
   it('should throw an error if no args', async () => {
     // @ts-expect-error - test empty args
-    await expect(async () => { await setupCoverage() }).rejects.toThrowError()
+    await expect(async () => { await setupCoverage() }).rejects.toThrow()
   })
 
   it('should throw an error if access EACCES', async () => {
@@ -119,7 +119,7 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrowError('EACCES')
+    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrow('EACCES')
   })
 
   it('should throw an error if rm EPERM', async () => {
@@ -128,7 +128,7 @@ describe('setupCoverage()', () => {
       '/files/testDir/testFile.json': ''
     })
 
-    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrowError('EPERM')
+    await expect(async () => { await setupCoverage(coverageArgs) }).rejects.toThrow('EPERM')
   })
 
   it('should set options and create directory and file', async () => {
@@ -198,7 +198,7 @@ describe('doCoverage()', () => {
 
     delete process.env.FORMATION_COVERAGE_FILE
 
-    await expect(async () => { await doCoverage('chromium', testPage as unknown as Page, false) }).rejects.toThrowError('No formation coverage file path')
+    await expect(async () => { await doCoverage('chromium', testPage as unknown as Page, false) }).rejects.toThrow('No formation coverage file path')
   })
 
   it('should start coverage', async () => {
