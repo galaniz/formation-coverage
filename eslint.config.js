@@ -2,11 +2,7 @@
  * Eslint
  */
 
-/* Imports */
-
 import tseslint from 'typescript-eslint'
-
-/* Config */
 
 export default tseslint.config(
   {

@@ -2,8 +2,6 @@
  * Coverage - Types
  */
 
-/* Imports */
-
 import type { ReportOptions } from 'istanbul-reports'
 
 /**

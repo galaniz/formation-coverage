@@ -2,8 +2,6 @@
  * Tests - Setup
  */
 
-/* Imports */
-
 import { afterEach, vi } from 'vitest'
 import { vol, fs } from 'memfs'
 

@@ -2,8 +2,6 @@
  * Scripts - Docs
  */
 
-/* Imports */
-
 import { renderMarkdownDocs } from '@alanizcreative/formation-docs/docs.js'
 
 /* Create README */
