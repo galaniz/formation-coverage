@@ -14,7 +14,7 @@ jobs:
     steps:
       # Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Set GitHub user
       - name: Set GitHub user
@@ -24,11 +24,11 @@ jobs:
 
       # Install PNPM
       - name: Install PNPM
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       # Set up Node.js for PNPM
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
@@ -44,7 +44,7 @@ jobs:
 
       # Release
       - name: Publish release
-        run: pnpm release
+        run: pnpm dlx release-it
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

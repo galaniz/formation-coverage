@@ -21,8 +21,6 @@
  * }
  */
 
-/* Imports */
-
 import type { Page } from '@playwright/test'
 import type { CoverageConfig, CoverageData, CoverageSourceMap } from './coverageTypes.js'
 import { mkdir, appendFile, writeFile, readFile, access, rm } from 'node:fs/promises'
@@ -92,6 +90,7 @@ const loadCoverage = async (testUrl: string): Promise<CoverageData[]> => {
  * Set options and create coverage folder and file.
  * 
  * @example
+ * title: Usage
  * desc: It's recommended to configure coverage options in your Playwright `globalSetup` file:
  * ts: // tests/setup.ts
  * 
@@ -309,8 +308,6 @@ const createCoverageReport = async (): Promise<void> => {
     report.execute(context)
   })
 }
- 
-/* Exports */
 
 export {
   setupCoverage,

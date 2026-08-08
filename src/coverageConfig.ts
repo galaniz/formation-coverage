@@ -2,8 +2,6 @@
  * Coverage - Config
  */
 
-/* Imports */
-
 import type { CoverageConfig } from './coverageTypes.js'
 
 /**
@@ -22,7 +20,5 @@ const coverageConfig: Required<CoverageConfig> = {
   include: [],
   exclude: []
 }
-
-/* Exports */
 
 export { coverageConfig }

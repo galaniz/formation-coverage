@@ -25,3 +25,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Update dependencies to latest versions.
+
+## [0.0.7] - 2026-08-08
+
+### Changed
+
+- Update dependencies to latest versions.

@@ -35,7 +35,7 @@ Set options and create coverage folder and file.
 
 <code>Promise&lt;void&gt;</code>
 
-### Examples
+### Usage
 
 It's recommended to configure coverage options in your Playwright `globalSetup` file:
 
@@ -56,16 +56,16 @@ export default async function () {
       'html'
     ],
     include: [
-      'spec/components/**\/*.js',
-      'spec/effects/**\/*.js',
-      'spec/layouts/**\/*.js',
-      'spec/objects/**\/*.js'
+      'spec/components/**/*.js',
+      'spec/effects/**/*.js',
+      'spec/layouts/**/*.js',
+      'spec/objects/**/*.js'
     ],
     exclude: [
-      'spec/utils/**\/*.js',
-      'spec/config/**\/*.js',
-      'spec/tests/**\/*.js',
-      'spec/**\/*.spec.js'
+      'spec/utils/**/*.js',
+      'spec/config/**/*.js',
+      'spec/tests/**/*.js',
+      'spec/**/*.spec.js'
     ]
   })
 }
@@ -90,7 +90,7 @@ Default: `true`
 
 <code>Promise&lt;void&gt;</code>
 
-### Examples
+### Example
 
 Use `doCoverage` before and after each test to capture coverage data:
 
@@ -123,7 +123,7 @@ Create coverage report from JSON data.
 
 <code>Promise&lt;void&gt;</code>
 
-### Examples
+### Example
 
 Generate coverage reports after tests complete in your Playwright `globalTeardown` file:
 

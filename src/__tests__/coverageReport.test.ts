@@ -2,8 +2,6 @@
  * Coverage - Report Tests
  */
 
-/* Imports */
-
 import type { CoverageData } from '../coverageTypes.js'
 import { it, expect, describe, vi, beforeAll, afterAll } from 'vitest'
 import { rm, mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'

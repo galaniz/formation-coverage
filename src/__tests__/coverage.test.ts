@@ -2,8 +2,6 @@
  * Coverage - Tests
  */
 
-/* Imports */
-
 import type { Page } from '@playwright/test'
 import type { CoverageData } from '../coverageTypes.js'
 import { it, expect, describe, vi, beforeEach, afterEach } from 'vitest'
