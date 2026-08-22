@@ -31,3 +31,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Update dependencies to latest versions.
+
+## [0.0.8] - 2026-08-22
+
+### Fixed
+
+- `istanbul-lib-coverage` import order so its exports populate before `istanbul-lib-instrument` requires them.

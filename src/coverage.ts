@@ -26,9 +26,9 @@ import type { CoverageConfig, CoverageData, CoverageSourceMap } from './coverage
 import { mkdir, appendFile, writeFile, readFile, access, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { glob } from 'glob'
+import libCoverage from 'istanbul-lib-coverage' // Before instrument, which requires its exports
 import { createInstrumenter } from 'istanbul-lib-instrument'
 import { coverageConfig } from './coverageConfig.js'
-import libCoverage from 'istanbul-lib-coverage'
 import libReport from 'istanbul-lib-report'
 import reports from 'istanbul-reports'
 import v8toIstanbul from 'v8-to-istanbul'
